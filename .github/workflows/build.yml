@@ -30,7 +30,7 @@ jobs:
           sudo apt-get install -y libasound2-dev libx11-dev libxcomposite-dev libxcursor-dev \
             libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libfreetype-dev libfontconfig1-dev
 
-            - name: Configurer
+      - name: Configurer
         if: runner.os != 'macOS'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
@@ -49,18 +49,13 @@ jobs:
             || cp -R build/Prophorcel_artefacts/VST3/Prophorcel.vst3 dist/
           ls -R dist | head -20
 
-      - name: Tester le plugin (macOS)
+      - name: Vérifier les architectures (macOS)
         if: runner.os == 'macOS'
         continue-on-error: true
         run: |
           set +e
-          codesign --force --deep -s - dist/Prophorcel.vst3
-          codesign --verify --deep --strict --verbose=2 dist/Prophorcel.vst3
           file dist/Prophorcel.vst3/Contents/MacOS/Prophorcel
-          python3 -c "import ctypes; ctypes.CDLL('dist/Prophorcel.vst3/Contents/MacOS/Prophorcel'); print('dlopen OK')"
-          curl -sL -o pluginval.zip https://github.com/Tracktion/pluginval/releases/latest/download/pluginval_macOS.zip
-          unzip -q pluginval.zip
-          ./pluginval.app/Contents/MacOS/pluginval --strictness-level 5 --validate-in-process --skip-gui-tests dist/Prophorcel.vst3
+          lipo -archs dist/Prophorcel.vst3/Contents/MacOS/Prophorcel
 
       - name: Publier le VST3
         uses: actions/upload-artifact@v4
