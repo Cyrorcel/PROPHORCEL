@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Prophorcel-VST3-${{ matrix.name }}
-          path: dist/Prophorcel.vst3
+          path: dist
