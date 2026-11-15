@@ -34,9 +34,9 @@ jobs:
         if: runner.os != 'macOS'
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-      - name: Configurer (macOS universel)
+      - name: Configurer (macOS universel, compatible macOS 11)
         if: runner.os == 'macOS'
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
 
       - name: Compiler
         run: cmake --build build --config Release --parallel
@@ -49,13 +49,13 @@ jobs:
             || cp -R build/Prophorcel_artefacts/VST3/Prophorcel.vst3 dist/
           ls -R dist | head -20
 
-      - name: Vérifier les architectures (macOS)
+      - name: Vérifier le plugin (macOS)
         if: runner.os == 'macOS'
         continue-on-error: true
         run: |
           set +e
           file dist/Prophorcel.vst3/Contents/MacOS/Prophorcel
-          lipo -archs dist/Prophorcel.vst3/Contents/MacOS/Prophorcel
+          otool -l dist/Prophorcel.vst3/Contents/MacOS/Prophorcel | grep -A4 LC_BUILD_VERSION
 
       - name: Publier le VST3
         uses: actions/upload-artifact@v4
